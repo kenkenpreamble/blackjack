@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ブラックジャック</title>
+    <style>
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 5px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>ブラックジャック</h1>
+
+    <p>
+        初期持ち金設定：
+        <input type="number" id="firstmoney" value="100">
+        <button onclick="setAllMoney()">設定</button>
+    </p>
+
+    <table>
+        <tr>
+            <th>プレイヤー</th>
+            <th>持ち金</th>
+            <th>現在掛け金</th>
+            <th>掛け金設定</th>
+            <th>チョイス</th>
+            <th>勝敗</th>
+            <th>勝敗結果</th>
+        </tr>
+
+        <tr id="playerRow0">
+            <td>
+                <input type="text" id="playername1" placeholder="プレイヤー1"><br>
+                <button onclick="setDealer(0)">ディーラー設定</button>
+            </td>
+            <td><p id="playermoney1">0</p></td>
+            <td><p id="playerkake1">0</p></td>
+            <td>
+                <input type="number" id="kake1">
+                <button onclick="setKake(0)">設定</button>
+            </td>
+            <td><button onclick="playerDouble(0)">ダブルダウン</button></td>
+            <td>
+                <button onclick="playerWin(0)">勝ち</button>
+                <button onclick="playerLose(0)">負け</button>
+            </td>
+            <td><p id="WinOrLose0"></p></td>
+        </tr>
+
+        <tr id="playerRow1">
+            <td>
+                <input type="text" id="playername2" placeholder="プレイヤー2"><br>
+                <button onclick="setDealer(1)">ディーラー設定</button>
+            </td>
+            <td><p id="playermoney2">0</p></td>
+            <td><p id="playerkake2">0</p></td>
+            <td>
+                <input type="number" id="kake2">
+                <button onclick="setKake(1)">設定</button>
+            </td>
+            <td><button onclick="playerDouble(1)">ダブルダウン</button></td>
+            <td>
+                <button onclick="playerWin(1)">勝ち</button>
+                <button onclick="playerLose(1)">負け</button>
+            </td>
+            <td><p id="WinOrLose1"></p></td>
+        </tr>
+
+        <tr id="playerRow2">
+            <td>
+                <input type="text" id="playername3" placeholder="プレイヤー3"><br>
+                <button onclick="setDealer(2)">ディーラー設定</button>
+            </td>
+            <td><p id="playermoney3">0</p></td>
+            <td><p id="playerkake3">0</p></td>
+            <td>
+                <input type="number" id="kake3">
+                <button onclick="setKake(2)">設定</button>
+            </td>
+            <td><button onclick="playerDouble(2)">ダブルダウン</button></td>
+            <td>
+                <button onclick="playerWin(2)">勝ち</button>
+                <button onclick="playerLose(2)">負け</button>
+            </td>
+            <td><p id="WinOrLose2"></p></td>
+        </tr>
+
+        <tr id="playerRow3">
+            <td>
+                <input type="text" id="playername4" placeholder="プレイヤー4"><br>
+                <button onclick="setDealer(3)">ディーラー設定</button>
+            </td>
+            <td><p id="playermoney4">0</p></td>
+            <td><p id="playerkake4">0</p></td>
+            <td>
+                <input type="number" id="kake4">
+                <button onclick="setKake(3)">設定</button>
+            </td>
+            <td><button onclick="playerDouble(3)">ダブルダウン</button></td>
+            <td>
+                <button onclick="playerWin(3)">勝ち</button>
+                <button onclick="playerLose(3)">負け</button>
+            </td>
+            <td><p id="WinOrLose3"></p></td>
+        </tr>
+
+    </table>
+
+    <p id="dealer">ディーラーを設定してください</p>
+    <p><button onclick="gameshift()">点数計算</button></p>
+    <div style="text-align: right;">
+        <button onclick="reset()">この回をやり直す</button><br><br><br>
+        <button onclick="resetall()">プレイヤー名以外リセット</button>
+    </div>
+
+    <script>
+        // プレイヤーの状態配列
+        let playermoney = [0,0,0,0]; // 持ち金
+        let playerkake = [0,0,0,0];  // 現在の掛け金
+        let counterdouble = [0,0,0,0]; // ダブルダウン済みか
+        let dealerIndex = -1; // ディーラー番号
+        let firstMoneySet = false; // 初期持ち金設定済みか
+        let counterkake = [0,0,0,0]; // 掛け金設定済みか
+        let WinOrLose = [0,0,0,0]; // 勝った人と負けた人
+        let FirstSetting = 0; // 初期金設定したかどうか
+        let Lastplayermoney = [0,0,0,0]; //リセット用
+
+        // 全員の持ち金を初期設定
+        function setAllMoney() {
+            if(firstMoneySet) {
+                alert("初期持ち金はすでに設定されています！");
+                return;
+            }
+            let firstM = Number(document.getElementById("firstmoney").value);
+            for(let i=0;i<4;i++){
+                playermoney[i] = firstM;
+                document.getElementById("playermoney"+(i+1)).innerText = firstM;
+                playerkake[i] = 0;
+                document.getElementById("playerkake"+(i+1)).innerText = 0;
+                counterdouble[i] = 0;
+            }
+            firstMoneySet = true;
+            Lastplayermoney = [firstM, firstM, firstM, firstM];
+        }
+
+        // 掛け金設定
+        function setKake(playerNum){
+            let kakeInput = Number(document.getElementById("kake"+(playerNum+1)).value);
+            if(firstMoneySet == 0){
+                alert("初期持ち金設定が済んでいません！")
+                return;
+            }
+            if(counterkake[playerNum] > 0){
+                alert("掛けはすでに行っています！");
+                return;
+            }
+            if(dealerIndex == -1){
+                alert("ディーラーを先に設定してください！");
+                return;
+            }
+            if(playerNum == dealerIndex){
+                alert("ディーラーは何も掛けません(´;ω;｀)");
+                return;
+            }
+            for(let i=0;i<4;i++){
+                playermoney[i] = Number(document.getElementById("playermoney"+(i+1)).innerText);
+            }
+            playermoney[playerNum] -= kakeInput;
+            playerkake[playerNum] = kakeInput;
+            document.getElementById("playermoney"+(playerNum+1)).innerText = playermoney[playerNum];
+            document.getElementById("playerkake"+(playerNum+1)).innerText = playerkake[playerNum];
+            counterkake[playerNum] += 1;
+        }
+
+        // ダブルダウン
+        function playerDouble(playerNum){
+            if(counterdouble[playerNum] === 1){
+                alert("ダブルダウンはすでに行っています！");
+                return;
+            }
+            if(playerkake[playerNum] === 0){
+                alert("先にかけを行ってください！");
+                return;
+            }
+            let nowkake = playerkake[playerNum];
+            playermoney[playerNum] -= nowkake;
+            playerkake[playerNum] += nowkake;
+            document.getElementById("playermoney"+(playerNum+1)).innerText = playermoney[playerNum];
+            document.getElementById("playerkake"+(playerNum+1)).innerText = playerkake[playerNum];
+            counterdouble[playerNum] = 1;
+        }
+
+        // ディーラー設定
+        function setDealer(playerNum){
+            if(dealerIndex > -1){
+                alert("この回のディーラーの変更はできません...");
+                return;
+            }
+
+            let result = confirm(document.getElementById("playername"+(playerNum+1)).value+" をディーラーにします。よろしいですか？");
+            if(result){
+                dealerIndex = playerNum;
+                let name = document.getElementById("playername"+(playerNum+1)).value;
+                document.getElementById("dealer").innerText = "ディーラー：" + name;
+                WinOrLose[playerNum] = 0;
+
+                // 全員の背景色を一旦リセット
+                for(let i=0; i<4; i++){
+                    document.getElementById("playerRow"+i).style.backgroundColor = "";
+                }
+                // ディーラーの行の背景色を設定
+                document.getElementById("playerRow"+playerNum).style.backgroundColor = "lightblue";
+                
+            } else {
+                alert("やり直してください！");
+            }
+        }
+
+        // 勝敗記録
+        function playerWin(playerNum){
+            if(dealerIndex == playerNum){
+                alert("あなたはディーラーですよ");
+                return;
+            }
+            if(playerkake[playerNum] === 0){
+                alert("先にかけを行ってください！");
+                return;
+            }
+            WinOrLose[playerNum] = 1;
+            document.getElementById("WinOrLose"+playerNum).innerText = "勝利";
+        }
+        function playerLose(playerNum){
+            if(dealerIndex == playerNum){
+                alert("あなたはディーラーですよ");
+                return;
+            }
+            if(playerkake[playerNum] === 0){
+                alert("先にかけを行ってください！");
+                return;
+            }
+            WinOrLose[playerNum] = -1;
+            document.getElementById("WinOrLose"+playerNum).innerText = "敗北";
+        }
+
+        // 点数計算＆ディーラー交代
+        function gameshift() {
+            if(Math.abs(WinOrLose[0])+Math.abs(WinOrLose[1])+Math.abs(WinOrLose[2])+Math.abs(WinOrLose[3])<3){
+                alert("勝敗の入力が完了していませんよー");
+                return;
+            }
+
+            // 点数計算
+            for(let i=0; i<4; i++){
+                if(WinOrLose[i] === 0){
+                    playermoney[i] += playerkake[i];
+                } else if(WinOrLose[i] === 1){
+                    playermoney[i] += 2 * playerkake[i];
+                    playermoney[dealerIndex] -= playerkake[i];
+                } else if(WinOrLose[i] === -1){
+                    playermoney[dealerIndex] += playerkake[i];
+                }
+                playerkake[i] = 0;
+                document.getElementById("playermoney"+(i+1)).innerText = playermoney[i];
+                document.getElementById("playerkake"+(i+1)).innerText = 0;
+            }
+            
+            playerkake[dealerIndex] = 0;
+            document.getElementById("playermoney"+(dealerIndex+1)).innerText = playermoney[dealerIndex];
+            document.getElementById("playerkake"+(dealerIndex+1)).innerText = 0;
+            
+            Lastplayermoney = [...playermoney]; // 配列をコピーして保存
+
+            // 状態リセット
+            // playermoneyは次のループのために保持するのでリセットしない
+            playerkake = [0,0,0,0];
+            counterdouble = [0,0,0,0];
+            dealerIndex = -1;
+            counterkake = [0,0,0,0];
+            WinOrLose = [0,0,0,0];
+            document.getElementById("dealer").innerText = "ディーラーを設定してください";
+            
+            // 表示リセット
+            for(let i=0; i<4; i++){
+                document.getElementById("playerRow"+i).style.backgroundColor = ""; // 背景色をリセット
+                document.getElementById("WinOrLose"+i).innerText = ""; // 勝敗表示をリセット
+            }
+        }
+        
+        // この回をやり直す
+        function reset(){
+            playermoney = [...Lastplayermoney]; // 配列をコピー
+            playerkake = [0,0,0,0];
+            counterdouble = [0,0,0,0];
+            dealerIndex = -1;
+            counterkake = [0,0,0,0];
+            WinOrLose = [0,0,0,0];
+            for(let i=0;i<4;i++){
+                document.getElementById("playerkake"+(i+1)).innerText = 0;
+                document.getElementById("playermoney"+(i+1)).innerText = Lastplayermoney[i];
+                document.getElementById("WinOrLose"+i).innerText = ""; // 勝敗表示をリセット
+                document.getElementById("playerRow"+i).style.backgroundColor = ""; // 背景色をリセット
+            }
+            document.getElementById("dealer").innerText = "ディーラーを設定してください";
+        }
+        
+        // 全てやり直す
+        function resetall(){
+            playermoney = [0,0,0,0];
+            playerkake = [0,0,0,0];
+            counterdouble = [0,0,0,0];
+            dealerIndex = -1;
+            counterkake = [0,0,0,0];
+            WinOrLose = [0,0,0,0];
+            Lastplayermoney = [0,0,0,0];
+            for(let i=0;i<4;i++){
+                document.getElementById("playerkake"+(i+1)).innerText = 0;
+                document.getElementById("playermoney"+(i+1)).innerText = 0;
+                document.getElementById("WinOrLose"+i).innerText = "";
+                document.getElementById("playerRow"+i).style.backgroundColor = ""; // 背景色をリセット
+            }
+            document.getElementById("dealer").innerText = "ディーラーを設定してください";
+            firstMoneySet = false;
+        }
+    </script>
+</body>
+</html>
