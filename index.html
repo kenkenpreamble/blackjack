@@ -104,6 +104,25 @@
             <td><p id="WinOrLose3"></p></td>
         </tr>
 
+        <tr id="playerRow4">
+            <td>
+                <input type="text" id="playername5" placeholder="プレイヤー5"><br>
+                <button onclick="setDealer(4)">ディーラー設定</button>
+            </td>
+            <td><p id="playermoney5">0</p></td>
+            <td><p id="playerkake5">0</p></td>
+            <td>
+                <input type="number" id="kake5">
+                <button onclick="setKake(4)">設定</button>
+            </td>
+            <td><button onclick="playerDouble(4)">ダブルダウン</button></td>
+            <td>
+                <button onclick="playerWin(4)">勝ち</button>
+                <button onclick="playerLose(4)">負け</button>
+            </td>
+            <td><p id="WinOrLose4"></p></td>
+        </tr>
+
     </table>
 
     <p id="dealer">ディーラーを設定してください</p>
@@ -115,15 +134,15 @@
 
     <script>
         // プレイヤーの状態配列
-        let playermoney = [0,0,0,0]; // 持ち金
-        let playerkake = [0,0,0,0];  // 現在の掛け金
-        let counterdouble = [0,0,0,0]; // ダブルダウン済みか
+        let playermoney = [0,0,0,0,0]; // 持ち金
+        let playerkake = [0,0,0,0,0];  // 現在の掛け金
+        let counterdouble = [0,0,0,0,0]; // ダブルダウン済みか
         let dealerIndex = -1; // ディーラー番号
         let firstMoneySet = false; // 初期持ち金設定済みか
-        let counterkake = [0,0,0,0]; // 掛け金設定済みか
-        let WinOrLose = [0,0,0,0]; // 勝った人と負けた人
+        let counterkake = [0,0,0,0,0]; // 掛け金設定済みか
+        let WinOrLose = [0,0,0,0,0]; // 勝った人と負けた人
         let FirstSetting = 0; // 初期金設定したかどうか
-        let Lastplayermoney = [0,0,0,0]; //リセット用
+        let Lastplayermoney = [0,0,0,0,0]; //リセット用
 
         // 全員の持ち金を初期設定
         function setAllMoney() {
@@ -132,7 +151,7 @@
                 return;
             }
             let firstM = Number(document.getElementById("firstmoney").value);
-            for(let i=0;i<4;i++){
+            for(let i=0;i<5;i++){
                 playermoney[i] = firstM;
                 document.getElementById("playermoney"+(i+1)).innerText = firstM;
                 playerkake[i] = 0;
@@ -140,7 +159,7 @@
                 counterdouble[i] = 0;
             }
             firstMoneySet = true;
-            Lastplayermoney = [firstM, firstM, firstM, firstM];
+            Lastplayermoney = [firstM, firstM, firstM, firstM, firstM];
         }
 
         // 掛け金設定
@@ -162,7 +181,7 @@
                 alert("ディーラーは何も掛けません(´;ω;｀)");
                 return;
             }
-            for(let i=0;i<4;i++){
+            for(let i=0;i<5;i++){
                 playermoney[i] = Number(document.getElementById("playermoney"+(i+1)).innerText);
             }
             playermoney[playerNum] -= kakeInput;
@@ -205,7 +224,7 @@
                 WinOrLose[playerNum] = 0;
 
                 // 全員の背景色を一旦リセット
-                for(let i=0; i<4; i++){
+                for(let i=0; i<5; i++){
                     document.getElementById("playerRow"+i).style.backgroundColor = "";
                 }
                 // ディーラーの行の背景色を設定
@@ -244,13 +263,13 @@
 
         // 点数計算＆ディーラー交代
         function gameshift() {
-            if(Math.abs(WinOrLose[0])+Math.abs(WinOrLose[1])+Math.abs(WinOrLose[2])+Math.abs(WinOrLose[3])<3){
+            if(Math.abs(WinOrLose[0])+Math.abs(WinOrLose[1])+Math.abs(WinOrLose[2])+Math.abs(WinOrLose[3])+Math.abs(WinOrLose[4])<4){
                 alert("勝敗の入力が完了していませんよー");
                 return;
             }
 
             // 点数計算
-            for(let i=0; i<4; i++){
+            for(let i=0; i<5; i++){
                 if(WinOrLose[i] === 0){
                     playermoney[i] += playerkake[i];
                 } else if(WinOrLose[i] === 1){
@@ -272,15 +291,15 @@
 
             // 状態リセット
             // playermoneyは次のループのために保持するのでリセットしない
-            playerkake = [0,0,0,0];
-            counterdouble = [0,0,0,0];
+            playerkake = [0,0,0,0,0];
+            counterdouble = [0,0,0,0,0];
             dealerIndex = -1;
-            counterkake = [0,0,0,0];
-            WinOrLose = [0,0,0,0];
+            counterkake = [0,0,0,0,0];
+            WinOrLose = [0,0,0,0,0];
             document.getElementById("dealer").innerText = "ディーラーを設定してください";
             
             // 表示リセット
-            for(let i=0; i<4; i++){
+            for(let i=0; i<5; i++){
                 document.getElementById("playerRow"+i).style.backgroundColor = ""; // 背景色をリセット
                 document.getElementById("WinOrLose"+i).innerText = ""; // 勝敗表示をリセット
             }
@@ -289,12 +308,12 @@
         // この回をやり直す
         function reset(){
             playermoney = [...Lastplayermoney]; // 配列をコピー
-            playerkake = [0,0,0,0];
-            counterdouble = [0,0,0,0];
+            playerkake = [0,0,0,0,0];
+            counterdouble = [0,0,0,0,0];
             dealerIndex = -1;
-            counterkake = [0,0,0,0];
-            WinOrLose = [0,0,0,0];
-            for(let i=0;i<4;i++){
+            counterkake = [0,0,0,0,0];
+            WinOrLose = [0,0,0,0,0];
+            for(let i=0;i<5;i++){
                 document.getElementById("playerkake"+(i+1)).innerText = 0;
                 document.getElementById("playermoney"+(i+1)).innerText = Lastplayermoney[i];
                 document.getElementById("WinOrLose"+i).innerText = ""; // 勝敗表示をリセット
@@ -305,14 +324,14 @@
         
         // 全てやり直す
         function resetall(){
-            playermoney = [0,0,0,0];
-            playerkake = [0,0,0,0];
-            counterdouble = [0,0,0,0];
+            playermoney = [0,0,0,0,0];
+            playerkake = [0,0,0,0,0];
+            counterdouble = [0,0,0,0,0];
             dealerIndex = -1;
-            counterkake = [0,0,0,0];
-            WinOrLose = [0,0,0,0];
-            Lastplayermoney = [0,0,0,0];
-            for(let i=0;i<4;i++){
+            counterkake = [0,0,0,0,0];
+            WinOrLose = [0,0,0,0,0];
+            Lastplayermoney = [0,0,0,0,0];
+            for(let i=0;i<5;i++){
                 document.getElementById("playerkake"+(i+1)).innerText = 0;
                 document.getElementById("playermoney"+(i+1)).innerText = 0;
                 document.getElementById("WinOrLose"+i).innerText = "";
